@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+      "target": "ES6",
+      "module": "commonjs",
+      "esModuleInterop": true, // 👈 agrega esta línea
+      "strict": true,
+      "moduleResolution": "node",
+      "outDir": "./dist",
+      "sourceMap": true,
+      "types": ["jest"],
+      // ...otros options que tengas
+    }
+  }
+  
