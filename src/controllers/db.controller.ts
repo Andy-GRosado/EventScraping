@@ -1,5 +1,5 @@
 
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose"
 import { IChecaTuLinea, IConsultaRucSchema } from "../utils/interfaces";
 
 export function getConnection (host: string, port: string, db: string,

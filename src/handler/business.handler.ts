@@ -31,33 +31,51 @@ export abstract class BaseObjectHandler<T, U, V extends U> {
     return this.status;
   }
 
-  public async bulkRequest(list_obj: T[]): Promise<{ processed: any[], success: any[], error: any[] }> {
+  public async bulkRequest(list_obj: T[], chunk_size: number = 1): Promise<{ processed: any[], success: any[], error: any[] }> {
     this.status = {
       processed: [],
       success: [],
       updated: [],
       error: []
-    }
+    };
+    let chunks: T[][] = list_obj.reduce((acc: any, current: T) => {
+      if (acc.length > chunk_size) {
+        acc.push([current])
+      } else {
+        acc.push(current)
+      }
+    }, [])
     this.status.processed = list_obj;
-    let result = await Promise.allSettled(list_obj.map((item) => this.requester.fetch_data(item)));
-    result.forEach(res => {
-      (res.status == 'fulfilled') ? this.status.success.push(res.value) : this.status.error.push(res.reason);
-    });
+    for (let current_chunk of chunks) {
+      let result = await Promise.allSettled(current_chunk.map((item: T) => this.requester.fetch_data(item)))
+      result.forEach(res => {
+        (res.status == 'fulfilled') ? this.status.success.push(res.value) : this.status.error.push(res.reason);
+      });
+    }
     return this.status;
   }
 
-  public async bulkRequestAndUpdate(list_obj: T[]): Promise<{ processed: any[], success: any[], error: any[] }> {
+  public async bulkRequestAndUpdate(list_obj: T[], chunk_size: number = 1): Promise<{ processed: any[], success: any[], error: any[] }> {
     this.status = {
       processed: [],
       success: [],
       updated: [],
       error: []
     }
+    let chunks: T[][] = list_obj.reduce((acc: any, current: T) => {
+      if (acc.length > chunk_size) {
+        acc.push([current])
+      } else {
+        acc.push(current)
+      }
+    }, []);
     this.status.processed = list_obj;
-    let result = await Promise.allSettled(list_obj.map((item) => this.requester.fetch_data(item)));
-    result.forEach(res => {
-      (res.status == 'fulfilled') ? this.status.success.push(res.value) : this.status.error.push(res.reason);
-    });
+    for (let current_chunk of chunks) {
+      let result = await Promise.allSettled(current_chunk.map((item: T) => this.requester.fetch_data(item)))
+      result.forEach(res => {
+        (res.status == 'fulfilled') ? this.status.success.push(res.value) : this.status.error.push(res.reason);
+      });
+    }
     await this.bulkSaving(this.status.success);
     return this.status;
   }
@@ -74,39 +92,39 @@ export class ConsultaRucHandler extends BaseObjectHandler<string, IConsultaRuc, 
     super(new ConsultaRucRequester(), connection, 'consulta_ruc_2', ConsultaRucSchema);
   }
   override async bulkSaving(obj: IConsultaRuc[]): Promise<void> {
-    await Promise.all(obj.map((item) =>
-      this.db_model.findOneAndUpdate(
-        { ruc: item.ruc },
-        {
-          $set: {
-            ruc: item.ruc,
-            razon_social: item.razon_social,
-            tipo_contribuyente: item.tipo_contribuyente,
-            nombre_comercial: item.nombre_comercial,
-            fecha_inscripcion: item.fecha_inscripcion,
-            fecha_inicio_actividades: item.fecha_inicio_actividades,
-            estado_contribuyente: item.estado_contribuyente,
-            condicion_contribuyente: item.condicion_contribuyente,
-            domicilio_fiscal: {
-              direccion: item.domicilio_fiscal.direccion,
-              provincia: item.domicilio_fiscal.provincia,
-              distrito: item.domicilio_fiscal.distrito
-            },
-            sistema_emision_comprobante: item.sistema_emision_comprobante,
-            actividad_exterior: item.actividad_exterior,
-            trabajadores: item.trabajadores,
-            actividad_economica_principal: item.actividad_economica_principal,
-            actividad_economica_secundaria: item.actividad_economica_secundaria,
-            last_update: Date.now()
-          }
-        },
-        {
-          new: true,
-          upsert: true,
-          runValidators: true
-        }
-      )
-    ));
+    // await Promise.all(obj.map((item) =>
+    //   this.db_model.findOneAndUpdate(
+    //     { ruc: item.ruc },
+    //     {
+    //       $set: {
+    //         ruc: item.ruc,
+    //         razon_social: item.razon_social,
+    //         tipo_contribuyente: item.tipo_contribuyente,
+    //         nombre_comercial: item.nombre_comercial,
+    //         fecha_inscripcion: item.fecha_inscripcion,
+    //         fecha_inicio_actividades: item.fecha_inicio_actividades,
+    //         estado_contribuyente: item.estado_contribuyente,
+    //         condicion_contribuyente: item.condicion_contribuyente,
+    //         domicilio_fiscal: {
+    //           direccion: item.domicilio_fiscal.direccion,
+    //           provincia: item.domicilio_fiscal.provincia,
+    //           distrito: item.domicilio_fiscal.distrito
+    //         },
+    //         sistema_emision_comprobante: item.sistema_emision_comprobante,
+    //         actividad_exterior: item.actividad_exterior,
+    //         trabajadores: item.trabajadores,
+    //         actividad_economica_principal: item.actividad_economica_principal,
+    //         actividad_economica_secundaria: item.actividad_economica_secundaria,
+    //         last_update: Date.now()
+    //       }
+    //     },
+    //     {
+    //       new: true,
+    //       upsert: true,
+    //       runValidators: true
+    //     }
+    //   )
+    // ));
     this.status.updated = obj;
   }
 }

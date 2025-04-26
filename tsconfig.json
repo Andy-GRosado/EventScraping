@@ -1,14 +1,11 @@
 {
-    "compilerOptions": {
-      "target": "ES6",
-      "module": "commonjs",
-      "esModuleInterop": true, // 👈 agrega esta línea
-      "strict": true,
-      "moduleResolution": "node",
-      "outDir": "./dist",
-      "sourceMap": true,
-      "types": ["jest"],
-      // ...otros options que tengas
-    }
+  "compilerOptions": {
+    "target": "es2017", // Set to es2017 or higher
+    "module": "es2022", // Set module to es2022 or higher
+    "moduleResolution": "node", // For module resolution, node is a good default
+    "esModuleInterop": true, // For compatibility with commonjs modules
+    "strict": true, // Optional, enables all strict type-checking options
+    "skipLibCheck": true, // Optional, skips type-checking of declaration files
+    "outDir": "./dist" // Optional, specify output directory for compiled files
   }
-  
+}

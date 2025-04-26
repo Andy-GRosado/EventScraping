@@ -1,5 +1,6 @@
 import { current_connection, getConnection, setCurrentConnection } from "./src/controllers/db.controller";
 import { ConsultaRucHandler } from "./src/handler/business.handler"
+import { main } from "./src/main";
 
 async function scraping() {
   setCurrentConnection('127.0.0.1', '27000', 'business_data', { db_authentication: 'admin', db_username: 'admin', db_password: 'admin' });
@@ -20,7 +21,6 @@ async function scraping() {
   // await actual_connection.close();
 }
 
-scraping()
-
+await main()
 
 
